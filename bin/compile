@@ -22,6 +22,7 @@ mkdir -p ${BUILD_DIR}/vendor
 
 echo "-> Copying ${CACHE_DIR}/$STACK/vendor/mono to ${BUILD_DIR}/vendor"
 cp -pr "${CACHE_DIR}/$STACK/vendor/mono" "${BUILD_DIR}/vendor/"
+export MONO_HOME="$BUILD_DIR/vendor/mono"
 
 rm -fr /app/vendor/mono
 
