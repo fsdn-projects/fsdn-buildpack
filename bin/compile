@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# bin/compile <build-dir> <cache-dir>
+
+BUILD_DIR=$1
+CACHE_DIR=$2
+LP_DIR=`cd $(dirname $0); cd ..; pwd`
+
+# fail fast
+set -e
+
+MONO_BINARY="https://github.com/george-ayris/mono-builder/releases/download/0.0.5/mono-4.2.2.30.tar.gz"
+
+MOZROOT="${BUILD_DIR}/vendor/mono/lib/mono/4.5/mozroots.exe"
+
+echo "-> Downloading mono to ${CACHE_DIR}/$STACK/vendor"
+if [ ! -d ${CACHE_DIR}/$STACK/vendor/mono ]; then
+  mkdir -p ${CACHE_DIR}/$STACK/vendor
+  curl -L $MONO_BINARY -s | tar zxf - -C ${CACHE_DIR}/$STACK/vendor
+fi
+
+mkdir -p ${BUILD_DIR}/vendor
+
+echo "-> Copying ${CACHE_DIR}/$STACK/vendor/mono to ${BUILD_DIR}/vendor"
+cp -pr "${CACHE_DIR}/$STACK/vendor/mono" "${BUILD_DIR}/vendor/"
+
+rm -fr /app/vendor/mono
+
+echo "-> Linking ${BUILD_DIR}/vendor/mono -> /app"
+ln -s "${BUILD_DIR}/vendor/mono" /app
+
+cp -p /app/mono/bin/fsharpc /app/mono/bin/fsharpc-heroku
+cp -p /app/mono/bin/fsharpi /app/mono/bin/fsharpi-heroku
+
+echo "-> Setting envvars"
+export PATH="/app/mono/bin:$PATH"
+export LD_LIBRARY_PATH="/app/mono/lib:$LD_LIBRARY_PATH"
+
+echo "-> Importing trusted root certificates"
+mono $MOZROOT --sync --import
+cp -r ~/.config ${BUILD_DIR}/.
+cd ${BUILD_DIR}
+
+echo "-> Compiling application"
+chmod +x ./build.sh
+./build.sh
+
+mkdir -p ${BUILD_DIR}/.profile.d
+cp -n ${LP_DIR}/.profile.d/* ${BUILD_DIR}/.profile.d/

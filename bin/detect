@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ -f $1/FSDN.sln ]; then
+  echo "FSDN"
+  exit 0
+else
+  exit 1
+fi
