@@ -22,7 +22,6 @@ mkdir -p ${BUILD_DIR}/vendor
 
 echo "-> Copying ${CACHE_DIR}/$STACK/vendor/mono to ${BUILD_DIR}/vendor"
 cp -pr "${CACHE_DIR}/$STACK/vendor/mono" "${BUILD_DIR}/vendor/"
-export MONO_HOME="$BUILD_DIR/vendor/mono"
 
 rm -fr /app/vendor/mono
 
@@ -43,7 +42,7 @@ cd ${BUILD_DIR}
 
 echo "-> Compiling application"
 chmod +x ./build.sh
-./build.sh
+./build.sh mono="$BUILD_DIR/vendor/mono"
 
 mkdir -p ${BUILD_DIR}/.profile.d
 cp -n ${LP_DIR}/.profile.d/* ${BUILD_DIR}/.profile.d/
